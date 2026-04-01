@@ -4,3 +4,35 @@ version = "0.1.0"
 edition = "2024"
 
 [dependencies]
+egui-async = "0.4.1"
+egui_logger = "0.10.0"
+log = "0.4.29"
+tokio = { version = "1" ,features = ["time"]}
+
+
+# Alt allocators
+mimalloc = { version = "0.1.48", optional = true }
+talc = { version = "5.0.3", optional = true }
+spinning_top = "0.3.0"
+
+[dependencies.eframe]
+version = "0.34.1"
+default-features = false
+features = [
+    "accesskit", "default_fonts", "wayland", "x11", "wgpu"
+]
+
+[dependencies.egui]
+version = "0.34.1"
+features = []
+
+#[profile.release]
+#opt-level = 2 # fast and small wasm
+#
+#[profile.dev.package."*"]
+#opt-level = 2
+
+[features]
+default = ["mimalloc"]
+talc = ["dep:talc"]
+mimalloc = ["dep:mimalloc"]
