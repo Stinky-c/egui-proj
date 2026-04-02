@@ -1,6 +1,7 @@
-#[cfg(feature = "talc")]
-use talc::{*, source::Claim};
 use eframe::NativeOptions;
+
+#[cfg(feature = "talc")]
+use talc::{source::Claim, *};
 
 #[cfg(all(feature = "talc", feature = "mimalloc"))]
 compile_error!("Only one allocator can be enabled. Pick between 'mimalloc' or 'talc'");
@@ -20,6 +21,8 @@ static TALC: TalcLock<spinning_top::RawSpinlock, Claim> = TalcLock::new(unsafe {
 
 const APP_NAME: &str = concat!("com.buckydev.", env!("CARGO_PKG_NAME"));
 mod app;
+pub mod components;
+pub mod carditems;
 
 fn main() -> eframe::Result {
     egui_logger::builder().init().unwrap();
