@@ -1,7 +1,6 @@
-use egui::Id;
 use serde::{Deserialize, Serialize};
-use url::Url;
 
+/// Expected to be a valid card
 #[derive(Serialize, Deserialize, Hash)]
 pub(crate) struct Card {
     pub(crate) image_link: String,
@@ -10,13 +9,6 @@ pub(crate) struct Card {
 }
 
 impl Card {
-    pub(crate) fn blank() -> Self {
-        Self {
-            image_link: "".to_string(),
-            title: "".to_string(),
-            description: "".to_string(),
-        }
-    }
     fn new(
         image_link: impl Into<String>,
         title: impl Into<String>,

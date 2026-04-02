@@ -1,6 +1,7 @@
 use crate::carditems::Card;
+use crate::components::CardBuilder;
 use eframe::Frame;
-use egui::{Context, Rect, Scene, Ui};
+use egui::{Context, Rect, Ui};
 use egui_async::Bind;
 use log::info;
 
@@ -11,19 +12,13 @@ pub(crate) struct App {
     pub(crate) deck_rect: Rect,
     pub(crate) items: Vec<Card>,
     pub(crate) show_loaders: bool,
-    pub(crate) card_builder: Card,
+    pub(crate) card_builder: CardBuilder,
 }
 
 impl App {
     pub(crate) fn new(cc: &eframe::CreationContext<'_>) -> Self {
         egui_extras::install_image_loaders(&cc.egui_ctx);
 
-        Self::default()
-    }
-}
-
-impl Default for App {
-    fn default() -> Self {
         Self {
             show_log: false,
             show_memory: false,
@@ -31,7 +26,7 @@ impl Default for App {
             msg: Bind::default(),
             deck_rect: Rect::ZERO,
             items: crate::carditems::helper(),
-            card_builder: Card::blank()
+            card_builder: CardBuilder::new(),
         }
     }
 }
@@ -58,11 +53,7 @@ impl eframe::App for App {
         }
 
         egui::Window::new("Card Builder").show(ui, |ui| {
-            ui.group(|ui| {
-                ui.text_edit_singleline(&mut self.card_builder.title);
-                ui.text_edit_singleline(&mut self.card_builder.image_link);
-                ui.text_edit_singleline(&mut self.card_builder.description);
-            })
+            crate::components::cardbuilder(self, ui);
         });
 
         egui::CentralPanel::default().show_inside(ui, |ui| {
