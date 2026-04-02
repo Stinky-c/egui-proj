@@ -3,6 +3,8 @@ name = "egui-proj"
 version = "0.1.0"
 edition = "2024"
 
+
+
 [dependencies]
 egui-async = "0.4.1"
 egui_logger = "0.10.0"
@@ -14,11 +16,8 @@ serde = { version = "1", features = ["derive"] }
 ron = { version = "0.12.1" }
 url = { version = "2.5.8", features = ["serde"] }
 image = { version = "0.25", features = ["jpeg", "png"] } # include desired formats
-
-
+directories = "5"
 exr = "1.74.0" # pin to fix dep issues
-
-
 # Alt allocators
 mimalloc = { version = "0.1.48", optional = true }
 talc = { version = "5.0.3", optional = true }
@@ -28,12 +27,14 @@ spinning_top = "0.3.0"
 version = "0.34.1"
 default-features = false
 features = [
-    "accesskit", "default_fonts", "wayland", "x11", "wgpu"
+    "accesskit", "default_fonts", "wayland", "x11", "wgpu",
+    "ron",
+    "persistence"
 ]
 
 [dependencies.egui]
 version = "0.34.1"
-features = []
+features = ["persistence", "serde"]
 
 [dependencies.egui_extras]
 version = "0.34.1"

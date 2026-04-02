@@ -1,28 +1,41 @@
 use crate::carditems::Card;
 use crate::components::CardBuilder;
-use eframe::Frame;
+use eframe::{Frame, Storage};
 use egui::{Context, Rect, Ui};
 use egui_async::Bind;
-use log::info;
+use log::{info, trace};
+use serde::{Deserialize, Serialize};
+use std::time::Duration;
+
+const WINDOWS_STORAGE_KEY: &'static str = "show_windows";
+const DECK_STORAGE_KEY: &'static str = "deck";
 
 pub(crate) struct App {
-    pub(crate) show_log: bool,
-    pub(crate) show_memory: bool,
+    pub(crate) windows: ShowWindowsFlags,
     msg: Bind<String, String>,
     pub(crate) deck_rect: Rect,
     pub(crate) items: Vec<Card>,
-    pub(crate) show_loaders: bool,
     pub(crate) card_builder: CardBuilder,
 }
+
+#[derive(Default, Debug, Deserialize, Serialize)]
+pub(crate) struct ShowWindowsFlags {
+    pub(crate) log: bool,
+    pub(crate) memory: bool,
+    pub(crate) loaders: bool,
+    pub(crate) card_builder: bool,
+}
+
+impl ShowWindowsFlags {}
 
 impl App {
     pub(crate) fn new(cc: &eframe::CreationContext<'_>) -> Self {
         egui_extras::install_image_loaders(&cc.egui_ctx);
 
+        let storage = cc.storage.expect("CreationContext Storage is not set?");
+
         Self {
-            show_log: false,
-            show_memory: false,
-            show_loaders: false,
+            windows: get_value_or_default(storage, WINDOWS_STORAGE_KEY),
             msg: Bind::default(),
             deck_rect: Rect::ZERO,
             items: crate::carditems::helper(),
@@ -39,32 +52,53 @@ impl eframe::App for App {
     fn ui(&mut self, ui: &mut Ui, _frame: &mut Frame) {
         crate::components::menubar(self, ui);
 
-        if self.show_log {
+        if self.windows.log {
             egui::Window::new("Log").show(ui, |ui| {
                 egui_logger::logger_ui().show(ui);
             });
         }
-        if self.show_memory {
+        if self.windows.memory {
             egui::Window::new("Memory").show(ui, |ui| ui.label("Memory go here"));
         }
 
-        if self.show_loaders {
+        if self.windows.loaders {
             egui::Window::new("Loaders").show(ui, |ui| ui.label("Loaders go here"));
         }
 
-        egui::Window::new("Card Builder").show(ui, |ui| {
-            crate::components::cardbuilder(self, ui);
-        });
+        if self.windows.card_builder {
+            egui::Window::new("Card Builder").show(ui, |ui| {
+                crate::components::cardbuilder(self, ui);
+            });
+        }
 
         egui::CentralPanel::default().show_inside(ui, |ui| {
             crate::components::deckscene(self, ui);
         });
     }
+
+    fn save(&mut self, storage: &mut dyn Storage) {
+        eframe::set_value(storage, WINDOWS_STORAGE_KEY, &self.windows);
+        storage.flush();
+    }
+
+    fn auto_save_interval(&self) -> Duration {
+        Duration::from_mins(1)
+    }
 }
 
 async fn say_hello() -> Result<String, String> {
     info!("Starting hello");
-    tokio::time::sleep(std::time::Duration::from_millis(1000)).await;
+    tokio::time::sleep(Duration::from_millis(1000)).await;
     info!("Resolved hello");
     Ok("Hello, World!".to_string())
+}
+
+fn get_value_or_default<T>(storage: &dyn Storage, key: &str) -> T
+where
+    T: Default + for<'de> serde::Deserialize<'de>,
+{
+    eframe::get_value(storage, key).unwrap_or_else(|| {
+        trace!("Missing: {}. Assuming default", key);
+        T::default()
+    })
 }

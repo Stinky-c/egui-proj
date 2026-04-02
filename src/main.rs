@@ -1,4 +1,5 @@
 use eframe::NativeOptions;
+use std::path::PathBuf;
 
 #[cfg(feature = "talc")]
 use talc::{source::Claim, *};
@@ -21,12 +22,16 @@ static TALC: TalcLock<spinning_top::RawSpinlock, Claim> = TalcLock::new(unsafe {
 
 const APP_NAME: &str = concat!("com.buckydev.", env!("CARGO_PKG_NAME"));
 mod app;
-pub mod components;
 pub mod carditems;
+pub mod components;
 
 fn main() -> eframe::Result {
     egui_logger::builder().init().unwrap();
     let options = NativeOptions {
+        persist_window: true,
+        persistence_path: Some(PathBuf::from(
+            r#"./config/hello.ron"#,
+        )),
         ..Default::default()
     };
 

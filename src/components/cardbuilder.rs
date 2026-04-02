@@ -1,5 +1,5 @@
 use crate::app::App;
-use egui::{Ui, WidgetText};
+use egui::{Color32, RichText, Ui, WidgetText};
 use egui_async::UiExt;
 use log::{error, info, trace};
 
@@ -101,37 +101,46 @@ pub(crate) fn cardbuilder(app: &mut App, ui: &mut Ui) {
     ui.heading("Card Builder");
     ui.group(|ui| {
         if edit_line_with_label(ui, "Title", &mut app.card_builder.title)
-            || edit_line_with_label(ui, "Description", &mut app.card_builder.description)
             || edit_line_with_label(ui, "Image Link", &mut app.card_builder.image_link)
+            || edit_multiline_with_label(ui, "Description", &mut app.card_builder.description)
         {
             app.card_builder.mark_dirty()
         }
     });
 
-    if ui.button("Validate").clicked() {
-        let _ = app.card_builder.validate();
-    };
-    if let Some(v) = app.card_builder.error
+    ui.horizontal(|ui| {
+        if ui.button("Validate").clicked() {
+            let _ = app.card_builder.validate();
+        };
+
+        ui.add_enabled_ui(
+            !app.card_builder.is_dirty && app.card_builder.error.is_none(),
+            |ui| {
+                if ui.button("Finalize").clicked() {
+                    // TODO: Copy successful card creation into deck
+                    info!("Card builder finalized");
+                    app.card_builder.clear();
+                }
+            },
+        );
+    });
+
+    if let Some(err) = app.card_builder.error
         && !app.card_builder.is_dirty
     {
-        if ui.popup_error(v.msg()) {
-            app.card_builder.clear_error();
-        }
+        ui.separator();
+        ui.heading(RichText::new("Error").color(Color32::RED));
+        ui.label(err.msg());
     }
     // Card must not have been changed since last validation, and must not have any errors
-    ui.add_enabled_ui(
-        !app.card_builder.is_dirty && app.card_builder.error.is_none(),
-        |ui| {
-            if ui.button("Finalize").clicked() {
-                // TODO: Copy successful card creation into deck
-                info!("Card builder finalized");
-                app.card_builder.clear();
-            }
-        },
-    );
 }
 
 fn edit_line_with_label(ui: &mut Ui, label: impl Into<WidgetText>, buf: &mut String) -> bool {
     ui.label(label);
     ui.text_edit_singleline(buf).changed()
+}
+
+fn edit_multiline_with_label(ui: &mut Ui, label: impl Into<WidgetText>, buf: &mut String) -> bool {
+    ui.label(label);
+    ui.text_edit_multiline(buf).changed()
 }
