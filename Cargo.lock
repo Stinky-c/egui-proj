@@ -1090,30 +1090,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "egui-proj"
-version = "0.1.0"
-dependencies = [
- "directories",
- "eframe",
- "egui",
- "egui-async",
- "egui_dnd",
- "egui_extras",
- "egui_logger",
- "exr",
- "image",
- "log",
- "mimalloc",
- "reqwest",
- "ron",
- "serde",
- "spinning_top",
- "talc",
- "tokio",
- "url",
-]
-
-[[package]]
 name = "egui-wgpu"
 version = "0.34.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2553,6 +2529,32 @@ checksum = "bb85c154ba489f01b25c0d36ae69a87e4a1c73a72631fc6c0eb6dde34a73e44b"
 dependencies = [
  "num-traits",
  "pxfm",
+]
+
+[[package]]
+name = "mtg-deckbuilder"
+version = "0.1.0"
+dependencies = [
+ "directories",
+ "eframe",
+ "egui",
+ "egui-async",
+ "egui_dnd",
+ "egui_extras",
+ "egui_logger",
+ "exr",
+ "image",
+ "log",
+ "mimalloc",
+ "reqwest",
+ "ron",
+ "serde",
+ "spinning_top",
+ "talc",
+ "tokio",
+ "url",
+ "wasm-bindgen-futures",
+ "web-sys",
 ]
 
 [[package]]
