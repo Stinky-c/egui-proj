@@ -1,13 +1,11 @@
 use crate::carditems::Card;
 use crate::components::CardBuilder;
 use eframe::{Frame, Storage};
-use egui::{Context, Rect, Theme, Ui};
+use egui::{Context, Rect, Ui};
 use egui_async::Bind;
 use log::{info, trace};
 use serde::{Deserialize, Serialize};
-use std::sync::Arc;
 use std::time::Duration;
-use crate::debug_reload;
 
 const WINDOWS_STORAGE_KEY: &'static str = "show_windows";
 const DECK_STORAGE_KEY: &'static str = "deck";
@@ -36,11 +34,6 @@ impl App {
 
         let storage = cc.storage.expect("CreationContext Storage is not set?");
 
-        {
-            let ctx = cc.egui_ctx.clone();
-            subsecond::register_handler(Arc::new(move || ctx.request_repaint()));
-        }
-
         Self {
             windows: get_value_or_default(storage, WINDOWS_STORAGE_KEY),
             msg: Bind::default(),
@@ -57,7 +50,7 @@ impl eframe::App for App {
     }
 
     fn ui(&mut self, ui: &mut Ui, _frame: &mut Frame) {
-        debug_reload!(crate::components::menubar(self, ui));
+        crate::components::menubar(self, ui);
 
         if self.windows.log {
             egui::Window::new("Log").show(ui, |ui| {
@@ -76,12 +69,12 @@ impl eframe::App for App {
 
         if self.windows.card_builder {
             egui::Window::new("Card Builder").show(ui, |ui| {
-                debug_reload!(crate::components::cardbuilder(self, ui));
+                crate::components::cardbuilder(self, ui);
             });
         }
 
         egui::CentralPanel::default().show_inside(ui, |ui| {
-            debug_reload!(crate::components::deckscene(self, ui));
+            crate::components::deckscene(self, ui);
         });
     }
 

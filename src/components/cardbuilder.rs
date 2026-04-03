@@ -117,6 +117,7 @@ pub(crate) fn cardbuilder(app: &mut App, ui: &mut Ui) {
             !app.card_builder.is_dirty && app.card_builder.error.is_none(),
             |ui| {
                 if ui.button("Finalize").clicked() {
+                    // oops i lost it
                     // TODO: Copy successful card creation into deck
                     info!("Card builder finalized");
                     app.card_builder.clear();

@@ -23,15 +23,11 @@ const APP_NAME: &str = concat!("com.buckydev.", env!("CARGO_PKG_NAME"));
 mod app;
 pub mod carditems;
 pub mod components;
-mod utils;
 
 #[cfg(not(target_arch = "wasm32"))]
 fn main() -> eframe::Result {
     use std::path::PathBuf;
     egui_logger::builder().init().unwrap();
-
-    #[cfg(debug_assertions)]
-    dioxus_devtools::connect_subsecond();
 
     let options = eframe::NativeOptions {
         persist_window: true,
@@ -39,13 +35,11 @@ fn main() -> eframe::Result {
         ..Default::default()
     };
 
-    debug_reload!({
-        eframe::run_native(
-            APP_NAME,
-            options.clone(),
-            Box::new(|cc| Ok(Box::new(app::App::new(cc)))),
-        )
-    })
+    eframe::run_native(
+        APP_NAME,
+        options.clone(),
+        Box::new(|cc| Ok(Box::new(app::App::new(cc)))),
+    )
 }
 
 #[cfg(target_arch = "wasm32")]
