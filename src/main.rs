@@ -23,23 +23,29 @@ const APP_NAME: &str = concat!("com.buckydev.", env!("CARGO_PKG_NAME"));
 mod app;
 pub mod carditems;
 pub mod components;
+mod utils;
 
 #[cfg(not(target_arch = "wasm32"))]
 fn main() -> eframe::Result {
     use std::path::PathBuf;
-
     egui_logger::builder().init().unwrap();
+
+    #[cfg(debug_assertions)]
+    dioxus_devtools::connect_subsecond();
+
     let options = eframe::NativeOptions {
         persist_window: true,
         persistence_path: Some(PathBuf::from(r#"./config/hello.ron"#)),
         ..Default::default()
     };
 
-    eframe::run_native(
-        APP_NAME,
-        options,
-        Box::new(|cc| Ok(Box::new(app::App::new(cc)))),
-    )
+    debug_reload!({
+        eframe::run_native(
+            APP_NAME,
+            options.clone(),
+            Box::new(|cc| Ok(Box::new(app::App::new(cc)))),
+        )
+    })
 }
 
 #[cfg(target_arch = "wasm32")]
@@ -47,9 +53,14 @@ fn main() {
     use eframe::wasm_bindgen::JsCast as _;
 
     // Redirect `log` message to `console.log` and friends:
-    egui_logger::builder().init().unwrap();
+    // eframe::WebLogger::init(log::LevelFilter::Debug).expect("Failed to initialize web logger");
+    egui_logger::builder()
+        .init()
+        .expect("failed to initialize egui logger");
 
-    let web_options = eframe::WebOptions::default();
+    let web_options = eframe::WebOptions {
+        ..Default::default()
+    };
 
     wasm_bindgen_futures::spawn_local(async {
         let document = web_sys::window()

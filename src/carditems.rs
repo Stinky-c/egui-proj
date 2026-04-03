@@ -10,7 +10,7 @@ pub(crate) struct Card {
 }
 
 impl Card {
-    fn new(image_link: Url, title: impl Into<String>, description: impl Into<String>) -> Self {
+    pub(crate) fn new(image_link: Url, title: impl Into<String>, description: impl Into<String>) -> Self {
         Self {
             image_link: image_link.into(),
             title: title.into(),
