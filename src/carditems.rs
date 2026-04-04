@@ -20,5 +20,5 @@ impl Card {
 }
 
 pub(crate) fn helper() -> Vec<Card> {
-    ron::from_str(include_str!("../config/cards.ron")).unwrap()
+    ron::from_str(include_str!("../.config/cards.ron")).unwrap()
 }

@@ -23,7 +23,7 @@ fn deckarea(app: &mut App, ui: &mut Ui) {
             //     }
             // });
 
-            egui::Image::new(egui::include_image!("../../config/testing.png"))
+            egui::Image::new(egui::include_image!("../../.config/testing.png"))
                 .fit_to_original_size(1f32)
                 .ui(ui);
         });

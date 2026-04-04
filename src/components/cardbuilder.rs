@@ -1,7 +1,9 @@
 use crate::app::App;
+use crate::carditems::Card;
 use egui::{Color32, RichText, Ui, WidgetText};
 use egui_async::UiExt;
 use log::{error, info, trace};
+use std::mem::take;
 
 /// Does not need to be a valid card, but does need to follow [crate::carditems::Card].
 /// `title`, `description`, and `image_link` are buffers for line editors.
@@ -57,19 +59,23 @@ impl CardBuilder {
 
         // If empty, or not ascii
         if self.title.is_empty() || !self.title.is_ascii() {
+            error!("Card title is empty or non-ASCII");
             self.error = Some(CardBuilderError::BadTitle);
         }
 
         // if empty, or not ascii, or not url
-        if self.image_link.is_empty()
-            || !self.image_link.is_ascii()
-            || url::Url::parse(self.image_link.as_str()).is_err()
-        {
+        if self.image_link.is_empty() || !self.image_link.is_ascii() {
+            error!("Card image link is empty or non-ASCII");
+            self.error = Some(CardBuilderError::BadImageLink);
+        }
+        if let Err(e) = url::Url::parse(&self.image_link) {
+            error!("Card image link parse error: {}", e);
             self.error = Some(CardBuilderError::BadImageLink);
         }
 
         // If empty, or not ascii
         if self.description.is_empty() || !self.description.is_ascii() {
+            error!("Card description is empty or non-ASCII");
             self.error = Some(CardBuilderError::BadDescription);
         }
 
@@ -83,17 +89,24 @@ impl CardBuilder {
         }
     }
 
-    fn clear(&mut self) {
-        self.title.clear();
-        self.description.clear();
-        self.image_link.clear();
+    fn clear_error(&mut self) {
         self.error = None;
         self.is_dirty = true;
     }
 
-    fn clear_error(&mut self) {
-        self.error = None;
-        self.is_dirty = true;
+    fn finalize(&mut self) -> Result<Card, CardBuilderError> {
+        if let Err(e) = self.validate() {
+            return Err(e);
+        }
+
+        self.clear_error();
+
+        let link = take(&mut self.image_link)
+            .parse()
+            .expect("Failed to parse image_link. Validation errored on finalize");
+        let card = Card::new(link, take(&mut self.title), take(&mut self.description));
+
+        Ok(card)
     }
 }
 
@@ -120,7 +133,12 @@ pub(crate) fn cardbuilder(app: &mut App, ui: &mut Ui) {
                     // oops i lost it
                     // TODO: Copy successful card creation into deck
                     info!("Card builder finalized");
-                    app.card_builder.clear();
+                    match app.card_builder.finalize() {
+                        Ok(v) => app.items.push(v),
+                        Err(e) => {
+                            info!("Card builder failed with error: {:?}", e);
+                        }
+                    }
                 }
             },
         );
